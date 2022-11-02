@@ -7,19 +7,41 @@ import Typography from '@mui/material/Typography';
 import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
 import Grid from '@mui/material/Grid';
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 export const Login = (props) => {
+    const navigate = useNavigate();
 
-    const handleSubmit = (event) => {
+    const handleSubmit = async (event) => {
         event.preventDefault();
         const data = new FormData(event.currentTarget);
-        console.log( {
-            email: data.get('email'),
-            password: data.get('password'),
-        });
-    };
 
+        let email = data.get('email');
+        let password = data.get('password');
+
+        let response = await makeQueryForCredentials(email, password);
+
+        if (response.ok === true)
+            navigate("/home");
+        else if (response.status === 401) {
+            alert("Login details incorrect!");
+        }
+        
+    };
+    
+    const makeQueryForCredentials = async (email, password) => {
+        let headers = new Headers();
+        headers.append('Authorization', 'Basic ' + btoa(email + ":" + password));
+
+        const url = 'https://localhost:8080/api/User';
+
+        const response = await fetch(url, {
+            method: 'GET',
+            headers: headers
+        });
+
+        return response;
+    }
 
     return (
         <Container> 
